@@ -1,0 +1,22 @@
+=== h2 (first packets of the connection, t = ms since first packet)
+    0.0 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [S], seq 3576577245, win 64240, options [mss 1460,sackOK,TS val 13011
+   50.1 ms  IP 10.0.0.2.443 > 10.0.0.1.41594: Flags [S.], seq 2089706298, ack 3576577246, win 65160, options [mss 1460,sa
+  100.2 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [.], ack 1, win 502, options [nop,nop,TS val 1301116707 ecr 386555214
+  101.1 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [P.], seq 1:1541, ack 1, win 502, options [nop,nop,TS val 1301116708 
+  151.1 ms  IP 10.0.0.2.443 > 10.0.0.1.41594: Flags [.], ack 1541, win 534, options [nop,nop,TS val 3865552250 ecr 130111
+  152.5 ms  IP 10.0.0.2.443 > 10.0.0.1.41594: Flags [P.], seq 1:2450, ack 1541, win 534, options [nop,nop,TS val 38655522
+  202.6 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [.], ack 2450, win 541, options [nop,nop,TS val 1301116809 ecr 386555
+  203.3 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [P.], seq 1541:1621, ack 2450, win 541, options [nop,nop,TS val 13011
+  203.5 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [P.], seq 1621:1753, ack 2450, win 541, options [nop,nop,TS val 13011
+  203.5 ms  IP 10.0.0.1.41594 > 10.0.0.2.443: Flags [P.], seq 1753:1801, ack 2450, win 541, options [nop,nop,TS val 13011
+=== h3 (first packets of the connection, t = ms since first packet)
+    0.0 ms  IP 10.0.0.1.47468 > 10.0.0.2.443: UDP, length 2400
+   50.3 ms  IP 10.0.0.2.443 > 10.0.0.1.47468: UDP, length 71
+   50.9 ms  IP 10.0.0.2.443 > 10.0.0.1.47468: UDP, length 1200
+   50.9 ms  IP 10.0.0.2.443 > 10.0.0.1.47468: UDP, length 1200
+   50.9 ms  IP 10.0.0.2.443 > 10.0.0.1.47468: UDP, length 342
+  101.7 ms  IP 10.0.0.1.47468 > 10.0.0.2.443: UDP, length 1200
+  101.8 ms  IP 10.0.0.1.47468 > 10.0.0.2.443: UDP, length 1406
+  101.8 ms  IP 10.0.0.1.47468 > 10.0.0.2.443: UDP, length 85
+  152.1 ms  IP 10.0.0.2.443 > 10.0.0.1.47468: UDP, length 613
+  152.6 ms  IP 10.0.0.2.443 > 10.0.0.1.47468: UDP, length 1198

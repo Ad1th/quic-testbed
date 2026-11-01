@@ -1,0 +1,2 @@
+h2 rtt=100ms connect=0.107672 handshake=0.218429 ttfb=0.326662 total=0.975675 http=2
+h3 rtt=100ms connect=0.109604 handshake=0.110810 ttfb=0.219935 total=0.871084 http=3
