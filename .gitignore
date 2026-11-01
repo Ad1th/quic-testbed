@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Windows / OneDrive artifacts
+*:Zone.Identifier
+Thumbs.db
+desktop.ini
+~$*
+
+# Editors
+.vscode/
+.idea/
+
+# Generated logs and rendered config (recreated by scripts/testbed.sh)
+logs/
+
+# TLS session secrets from packet captures
+data/captures/keys.log
+*.key
+*.pem
