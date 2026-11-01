@@ -1,0 +1,8 @@
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.conf text eol=lf
+*.pdf binary
+*.docx binary
+*.pcap binary
+*.png binary
