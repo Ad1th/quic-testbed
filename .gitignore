@@ -1,4 +1,4 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 .venv/
@@ -7,6 +7,7 @@ venv/
 
 # Windows / OneDrive artifacts
 *:Zone.Identifier
+*Zone.Identifier
 Thumbs.db
 desktop.ini
 ~$*
