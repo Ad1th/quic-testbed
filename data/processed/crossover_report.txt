@@ -1,0 +1,36 @@
+# Crossover analysis  (data/raw/results.csv, 1560 rows, 41 failed/timeouts counted at 40s)
+
+## Static grid - median total_s  (h2 / h3, ratio h3/h2; * = winner by >5%)
+loss%\RTT                     20ms                    50ms                   100ms                   150ms                   200ms                   300ms
+       0      0.19/  0.17  0.91x 3    0.46/  0.41  0.89x 3    0.91/  0.81  0.89x 3    1.42/  1.27  0.89x 3    1.81/  1.61  0.89x 3    2.71/  2.41  0.89x 3
+     0.5      0.19/  0.28  1.49x 2    0.46/  0.58  1.28x 2    1.11/  0.91  0.82x 3    1.58/  1.50  0.95x =    2.01/  2.41  1.20x 2    3.52/  3.76  1.07x 2
+       1      0.19/  1.02  5.46x 2    0.66/  0.74  1.12x 2    1.36/  3.44  2.53x 2    2.22/  3.80  1.71x 2    2.21/  7.99  3.62x 2    4.96/  3.93  0.79x 3
+       2      0.31/  2.21  7.18x 2    1.71/  5.44  3.18x 2    3.86/ 10.28  2.66x 2    2.97/ 11.39  3.83x 2    5.26/ 20.27  3.85x 2    7.81/ 27.76  3.55x 2
+       3      1.62/  2.95  1.82x 2    3.92/  7.43  1.90x 2    5.85/ 11.30  1.93x 2    9.81/ 20.64  2.11x 2   11.09/ 24.68  2.23x 2   11.33/ 38.01  3.36x 2
+       5      2.97/  4.09  1.38x 2    6.00/ 10.01  1.67x 2    9.54/ 18.87  1.98x 2   16.01/ 26.58  1.66x 2   20.35/ 37.32  1.83x 2   30.43/ 40.00  1.31x 2
+(winner marks: 2 = HTTP/2 faster, 3 = HTTP/3 faster, = within tie band)
+
+## Boundary along the loss axis (per RTT): loss% where h3/h2 crosses 1
+  RTT  20ms: ratio 0.91x @ 0% -> 1.38x @ 5%   crossing at loss ~ 0.10%
+  RTT  50ms: ratio 0.89x @ 0% -> 1.67x @ 5%   crossing at loss ~ 0.16%
+  RTT 100ms: ratio 0.89x @ 0% -> 1.98x @ 5%   crossing at loss ~ 0.59%
+  RTT 150ms: ratio 0.89x @ 0% -> 1.66x @ 5%   crossing at loss ~ 0.54%
+  RTT 200ms: ratio 0.89x @ 0% -> 1.83x @ 5%   crossing at loss ~ 0.19%
+  RTT 300ms: ratio 0.89x @ 0% -> 1.31x @ 5%   crossing at loss ~ 0.32%, 0.61%, 1.15%
+
+## Boundary along the RTT axis (per loss): RTT where h3/h2 crosses 1
+  loss    0%: ratio 0.91x @ 20ms -> 0.89x @ 300ms   crossing at RTT ~ none in range
+  loss  0.5%: ratio 1.49x @ 20ms -> 1.07x @ 300ms   crossing at RTT ~ 78ms, 161ms
+  loss    1%: ratio 5.46x @ 20ms -> 0.79x @ 300ms   crossing at RTT ~ 285ms
+  loss    2%: ratio 7.18x @ 20ms -> 3.55x @ 300ms   crossing at RTT ~ none in range
+  loss    3%: ratio 1.82x @ 20ms -> 3.36x @ 300ms   crossing at RTT ~ none in range
+  loss    5%: ratio 1.38x @ 20ms -> 1.31x @ 300ms   crossing at RTT ~ none in range
+
+Static conditions: h3 faster in 8, h2 faster in 27, tie in 1 of 36.
+Zero/lowest-loss row, h3/h2 by RTT: 20ms=0.91x, 50ms=0.89x, 100ms=0.89x, 150ms=0.89x, 200ms=0.89x, 300ms=0.89x
+
+## Mobile profiles - median total_s
+  india_4g             h2   1.45s  h3   0.97s  ratio  0.66x  winner=h3  (h3 won 70% of paired iterations, fails h2/h3 = 1/1)
+  india_4g_congested   h2   5.07s  h3   4.80s  ratio  0.95x  winner=h3  (h3 won 75% of paired iterations, fails h2/h3 = 6/1)
+  india_5g             h2   1.33s  h3   0.78s  ratio  0.59x  winner=h3  (h3 won 85% of paired iterations, fails h2/h3 = 0/0)
+  median handshake_s: india_4g: h2 0.128 / h3 0.091; india_4g_congested: h2 0.384 / h3 0.237; india_5g: h2 0.119 / h3 0.077

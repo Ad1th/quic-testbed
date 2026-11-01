@@ -1,0 +1,21 @@
+# Crossover analysis  (data/raw/results_10MB.csv, 180 rows, 21 failed/timeouts counted at 90s)
+
+## Static grid - median total_s  (h2 / h3, ratio h3/h2; * = winner by >5%)
+loss%\RTT                     20ms                   100ms                   300ms
+       0      0.30/  0.34  1.13x 2    1.40/  1.72  1.23x 2    4.16/  5.12  1.23x 2
+     0.5      0.31/ 10.55 34.04x 2   23.81/ 50.23  2.11x 2   36.17/ 90.00  2.49x 2
+       1      6.10/ 16.64  2.73x 2   42.93/ 81.68  1.90x 2   72.11/ 90.00  1.25x 2
+(winner marks: 2 = HTTP/2 faster, 3 = HTTP/3 faster, = within tie band)
+
+## Boundary along the loss axis (per RTT): loss% where h3/h2 crosses 1
+  RTT  20ms: ratio 1.13x @ 0% -> 2.73x @ 1%   crossing at loss ~ none in range
+  RTT 100ms: ratio 1.23x @ 0% -> 1.90x @ 1%   crossing at loss ~ none in range
+  RTT 300ms: ratio 1.23x @ 0% -> 1.25x @ 1%   crossing at loss ~ none in range
+
+## Boundary along the RTT axis (per loss): RTT where h3/h2 crosses 1
+  loss    0%: ratio 1.13x @ 20ms -> 1.23x @ 300ms   crossing at RTT ~ none in range
+  loss  0.5%: ratio 34.04x @ 20ms -> 2.49x @ 300ms   crossing at RTT ~ none in range
+  loss    1%: ratio 2.73x @ 20ms -> 1.25x @ 300ms   crossing at RTT ~ none in range
+
+Static conditions: h3 faster in 0, h2 faster in 9, tie in 0 of 9.
+Zero/lowest-loss row, h3/h2 by RTT: 20ms=1.13x, 100ms=1.23x, 300ms=1.23x
