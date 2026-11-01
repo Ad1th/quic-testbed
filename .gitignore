@@ -23,3 +23,8 @@ logs/
 data/captures/keys.log
 *.key
 *.pem
+
+# Lab submission and report files (kept locally, not published)
+docs/Computer Networks Lab Submission 9.pdf
+docs/Network_Measurement_Evidence.docx
+docs/Project_Report_Real_Results.docx
