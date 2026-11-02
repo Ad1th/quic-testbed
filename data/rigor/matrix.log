@@ -36,3 +36,43 @@ topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
 done 20261101T230318-bd7a80 /work/data/rigor/F_bridge.csv
 topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
 [1/8] offloads=off rtt=50 loss=0 30s fails=0
+[2/8] offloads=off rtt=50 loss=1 167s fails=0
+[3/8] offloads=off rtt=50 loss=2 269s fails=0
+[4/8] offloads=off rtt=50 loss=5 530s fails=0
+[5/8] offloads=off rtt=100 loss=0 53s fails=0
+[6/8] offloads=off rtt=100 loss=1 317s fails=0
+[7/8] offloads=off rtt=100 loss=2 498s fails=0
+[8/8] offloads=off rtt=100 loss=5 960s fails=0
+done 20261101T235037-8d32c5 /work/data/rigor/G_bridge_rcvbuf4m.csv
+topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
+[1/1] offloads=off rtt=50 loss=2 143s fails=0
+done 20261102T003745-86c43e /work/data/rigor/D_qlog.csv
+EXIT2 0
+--- matrix3 Mon Nov  2 06:10:25 IST 2026
+Dockerfile.quiche:6
+--------------------
+   5 |     ENV PATH=/root/.cargo/bin:$PATH
+   6 | >>> RUN git clone -q --depth 1 --branch 0.29.3 --recursive https://github.com/cloudflare/quiche /build/quiche \
+   7 | >>>  && cd /build/quiche && cargo build -q --release --bin quiche-server
+   8 |     FROM quic-testbed:pinned
+--------------------
+ERROR: failed to solve: process "/bin/sh -c git clone -q --depth 1 --branch 0.29.3 --recursive https://github.com/cloudflare/quiche /build/quiche  && cd /build/quiche && cargo build -q --release --bin quiche-server" did not complete successfully: exit code: 101
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/w44ifyfbvc56fqx1tg4tj9rcq
+EXIT3 1
+--- matrix4 Mon Nov  2 06:14:37 IST 2026
+sha256:a246506dc05c9ca9d6dfa2d1f589bdbfc045a4d3541ced3d3f7bb688ed9b1f2e
+topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
+[1/8] offloads=off rtt=50 loss=0 30s fails=0
+[2/8] offloads=off rtt=50 loss=1 1034s fails=0
+[3/8] offloads=off rtt=50 loss=2 1976s fails=0
+[4/8] offloads=off rtt=50 loss=5 464s fails=0
+[5/8] offloads=off rtt=100 loss=0 54s fails=0
+[6/8] offloads=off rtt=100 loss=1 224s fails=0
+[7/8] offloads=off rtt=100 loss=2 361s fails=0
+[8/8] offloads=off rtt=100 loss=5 789s fails=0
+done 20261102T004449-687a16 /work/data/rigor/P_nginx_patched.csv
+EXIT4 0
+--- matrix3 retry Mon Nov  2 07:48:14 IST 2026
+topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
+[1/8] offloads=off rtt=50 loss=0 41s fails=0

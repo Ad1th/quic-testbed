@@ -22,7 +22,8 @@ Review of the original results raised four confounds that could each produce "HT
 | netem placement | `--topology bridge`: client and server are joined through a third *router* namespace (L2 bridge); netem sits on the router's egress ports; endpoint TSO/GSO/UDP-GSO off, router GRO off. Per-transfer netem `sent`/`dropped` counters logged, so the *realised* loss is measured, not assumed |
 | UDP rcvbuf | per-transfer client `Udp RcvbufErrors` logged; `--rcvbuf 4194304` condition raises `net.core.rmem_default` |
 | Implementation | third sender `h3qg`: quic-go v0.64.1 HTTP/3 static file server (`repro/quicgo-server`) |
-| Exit hangs | curl/ngtcp2 sometimes printed its timing line and then hung on connection close (one case: 17.5 min). Fetches are now killed after max-time+5 s and the already-printed measurement kept (`exit_hang` column). Timing data were never affected; only wall-clock run length |
+| Process hangs / host pauses | every fetch is killed after max-time+5 s (`exit_hang` column; never triggered); transfers next to a wall-clock gap > 60 s (host sleep) are excluded in analysis; later runs under `caffeinate` |
+| Sender sanity | preflight: each sender must serve the object over the intended HTTP version on a clean link before measuring |
 
 Grid for every configuration: RTT {50, 100} ms x uniform random loss {0, 1, 2, 5} % x 20 rotated-order iterations x 3 senders
 (nginx HTTP/2 `h2`, nginx HTTP/3 `h3`, quic-go HTTP/3 `h3qg`), 1 MB object, 1 Gbit netem rate, 40 s cap. Statistics:
@@ -74,10 +75,11 @@ The original result (nginx HTTP/3 much slower than HTTP/2 under uniform loss) **
 and significantly faster in 4 of 8. "HTTP/3 loses under loss" is therefore a property of the nginx sender (and aioquic), not of
 QUIC. The bridge configurations (F, G) below test whether this survives equal per-packet loss.
 
-## Finding 4: curl/ngtcp2 can hang after a completed HTTP/3 transfer
+## Finding 4 (withdrawn): "curl/ngtcp2 hang after a completed transfer"
 
-One nginx-HTTP/3 transfer at 50 ms / 1 % reported a normal 4-7 s `time_total` and then did not exit for ~1050 s.
-Not investigated further; reported upstream-worthy.
+One nginx-HTTP/3 transfer at 50 ms / 1 % reported a normal `time_total` and the next transfer started ~1050 s later. This was
+first read as a curl exit hang; the exit-hang guard added afterwards never fired in ~2,500 transfers, and the gap matches a
+macOS idle sleep (see Data hygiene). The transfer is excluded.
 
 ## Finding 5 (the main result): under equal per-packet loss most of the HTTP/3 penalty disappears
 
@@ -104,8 +106,78 @@ Reading:
 - The verdict "HTTP/3 loses under loss" is therefore a property of (a) where netem sits and (b) nginx's QUIC sender.
 - 0 failures, 0 exit hangs in F. nginx h3 still had 7,673 client RcvbufErrors over its 160 transfers (quic-go 12): see G.
 
-## Pending (filled in as runs complete)
+## Finding 6: with the receive buffer fixed too (G), the 0 %-loss result of the course report replicates
 
-- G (bridge, 4 MB rcvbuf): removes the receive-buffer confound.
-- D (qlog): stall structure of nginx vs quic-go connections under 2 % loss -> mechanism.
-- H (G + Cloudflare quiche as a fourth sender): does a second mature stack behave like quic-go?
+Configuration G = F + 4 MB client UDP rcvbuf. Zero RcvbufErrors, zero failures, zero exit hangs (480 transfers).
+
+| RTT / loss | h2 (s) | nginx h3 (s) | quic-go h3 (s) | nginx h3/h2 | quic-go h3/h2 |
+|---|---|---|---|---|---|
+| 50 / 0 % | 0.55 | 0.47 | 0.35 | **0.85*** | 0.63* |
+| 50 / 1 % | 1.62 | 4.58 | 1.19 | 2.72* | 0.70 |
+| 50 / 2 % | 4.29 | 6.86 | 2.86 | 1.63* | 0.62 (p_bonf 0.07) |
+| 50 / 5 % | 9.58 | 11.19 | 6.03 | 1.15* | 0.57* |
+| 100 / 0 % | 0.99 | 0.87 | 0.69 | **0.87*** | 0.69* |
+| 100 / 1 % | 4.44 | 8.14 | 2.70 | 2.07* | 0.77 |
+| 100 / 2 % | 7.72 | 12.95 | 5.39 | 1.60* | 0.64 (p_bonf 0.08) |
+| 100 / 5 % | 17.04 | 20.40 | 10.38 | 1.23 | 0.59* |
+
+- At 0 % loss nginx HTTP/3 is now 13-15 % faster than HTTP/2, matching the course report's "~11 % faster" (the 1-RTT handshake
+  saving). In F/A it was 17-36 % *slower*: the difference is entirely the client receive-buffer overflow.
+- CPU per transfer is small for every sender (median client 0.016-0.022 s, server 0.01-0.02 s per 1 MB at 0 % loss), so
+  in serial runs CPU is not the bottleneck at these rates.
+
+## Finding 7 (mechanism, qlog run D at 50 ms / 2 %, G settings, 10 transfers per QUIC sender)
+
+- Neither QUIC sender shows receive stalls > 150 ms at the client (no PTO-driven idle periods); quic-go's server qlog shows
+  0-7 PTO expiries and 12-23 declared losses per connection.
+- What differs is the **steady sending rate**: the client receives a median of **4.0 packets per 50 ms RTT from nginx** vs
+  **11.5 from quic-go**, whose server-side congestion window has a time-weighted median of **13.9 packets**. A Reno/CUBIC
+  AIMD sender in the TCP-friendly region at p = 2 % is expected near 1.22/sqrt(p) ~ 8.6 packets. nginx runs at less than half of
+  that, i.e. its window is held below what its own CUBIC implementation should reach.
+- Candidate cause (from source, `src/event/quic/ngx_event_quic_ack.c`, `ngx_quic_congestion_lost`): on each congestion event
+  nginx sets `ssthresh = in_flight * 0.7`, computed after the lost packet (and already-acked packets) have been subtracted
+  from `in_flight`, instead of reducing from the congestion window as in RFC 9438 Sec. 4.6. If the sender is not fully
+  window-limited at that moment, every loss shrinks the window by more than the 30 % CUBIC intends.
+- **Intervention test (P), below.**
+
+## Finding 8 (root cause, intervention): one line in nginx's loss handler accounts for most of the remaining penalty
+
+Configuration P = G with nginx rebuilt from the same commit with **only** `ssthresh = in_flight * 0.7` changed to
+`ssthresh = window * 0.7` in `ngx_quic_congestion_lost` (`repro/Dockerfile.nginxpatch`). 3 transfers adjacent to host sleep
+excluded (see "Data hygiene").
+
+| RTT / loss | nginx h3 stock (G), s | nginx h3 patched (P), s | speed-up | nginx h3/h2 G | nginx h3/h2 P |
+|---|---|---|---|---|---|
+| 50 / 0 % | 0.47 | 0.47 | 1.00 | 0.85* | 0.81* |
+| 50 / 1 % | 4.58 | 2.05 | 2.2x | 2.72* | 1.31 (n.s.) |
+| 50 / 2 % | 6.86 | 3.77 | 1.8x | 1.63* | 0.84 (n.s.) |
+| 50 / 5 % | 11.19 | 6.73 | 1.7x | 1.15* | **0.64*** |
+| 100 / 0 % | 0.87 | 0.88 | 0.99 | 0.87* | 0.87* |
+| 100 / 1 % | 8.14 | 1.81 | 4.5x | 2.07* | 0.66 (n.s.) |
+| 100 / 2 % | 12.95 | 4.31 | 3.0x | 1.60* | **0.65*** |
+| 100 / 5 % | 20.40 | 13.73 | 1.5x | 1.23 | 0.87 (p_bonf 0.08) |
+
+- Loss-free performance is unchanged (the patch only touches the congestion-event path), lossy performance improves
+  1.5-4.5x. Stock nginx is significantly slower than HTTP/2 in 6 of 6 lossy cells; patched nginx in **none**, and
+  significantly faster in 2.
+- Cross-run absolute times drift (HTTP/2 medians in P are 0-60 % above G at 1 %, where TCP's completion time is bimodal),
+  which is why the within-run paired ratios are the primary metric; both metrics agree.
+- **How to describe it precisely.** RFC 9438 Sec. 4.6 itself defines the reduction from `flight_size` (bytes outstanding) and
+  allows `cwnd` only with safeguards against growing the window while application-limited. So using bytes in flight is
+  not by itself non-compliant. The problem is *when* nginx reads it: `ngx_quic_congestion_lost` runs after the ACK's
+  newly-acknowledged packets and the lost packet itself have already been subtracted from `in_flight`, so the value is
+  smaller than the flight size at the congestion event and each loss cuts the window by more than beta. Our patch
+  (use `window`) is a mechanism test, not a proposed upstream fix as-is (it lacks the RFC's app-limited safeguard).
+  A proper fix would snapshot the flight size before the ACK is processed. Worth reporting to nginx with this data.
+
+## Data hygiene
+
+- Host sleep: the Mac idle-slept three times during unattended runs (macOS `pmset` log: DarkWake from Deep Idle), freezing the
+  Docker VM between transfers. Analysis and plots drop any transfer whose wall-clock gap to the previous transfer of the same
+  run exceeds its own duration by > 60 s (A: 1 transfer, which is also the "17-minute curl hang" first attributed to curl;
+  P: 3 transfers). Later runs used `caffeinate`. The exit-hang guard never fired, so the curl-hang note in Finding 4 is
+  withdrawn: it was host sleep.
+
+## Pending
+
+- H (G conditions + Cloudflare quiche 0.29.3 as a fourth sender): running.

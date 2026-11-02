@@ -14,6 +14,10 @@ out = sys.argv[1]
 os.makedirs(out, exist_ok=True)
 cfg = dict(a.split("=", 1) for a in sys.argv[2:])
 D = {k: pd.read_csv(v) for k, v in cfg.items()}
+for k in list(D):  # drop transfers adjacent to host sleep (see analyze_rigor.py)
+    d = D[k]
+    gap = pd.to_datetime(d.timestamp).groupby(d.run_id).diff().dt.total_seconds() - d.total_s.fillna(40)
+    D[k] = d[~(gap > 60)].copy()
 for d in D.values():
     d["t"] = np.where(d.ok == 1, d.total_s, 40.0)
     d["drop_pct"] = 100 * d.data_dropped / (d.data_sent_pkts + d.data_dropped).clip(lower=1)

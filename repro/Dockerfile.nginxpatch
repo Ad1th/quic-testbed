@@ -1,0 +1,10 @@
+# Intervention test for nginx's HTTP/3 loss penalty. nginx's CUBIC (src/event/quic/ngx_event_quic_ack.c,
+# ngx_quic_congestion_lost) sets ssthresh = in_flight * 0.7, where in_flight has already had the lost (and newly acked)
+# packets subtracted. RFC 9438 4.6 reduces from the congestion window. This image rebuilds the same nginx commit with
+# ssthresh = window * 0.7 and nothing else changed.
+FROM quic-testbed:pinned
+RUN cd /build/nginx && grep -q 'cg->ssthresh = cg->in_flight \* NGX_QUIC_CUBIC_BETA / 10;' src/event/quic/ngx_event_quic_ack.c \
+ && sed -i 's|cg->ssthresh = cg->in_flight \* NGX_QUIC_CUBIC_BETA / 10;|cg->ssthresh = cg->window * NGX_QUIC_CUBIC_BETA / 10;|' \
+    src/event/quic/ngx_event_quic_ack.c \
+ && grep -n 'cg->ssthresh = cg->window' src/event/quic/ngx_event_quic_ack.c \
+ && make -j"$(nproc)" >/dev/null && make install >/dev/null

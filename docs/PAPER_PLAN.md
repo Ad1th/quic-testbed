@@ -5,6 +5,11 @@ than HTTP/2 under >= 2 % loss") does not hold as a protocol result. What holds i
 
 ## Working title
 **"Equal Loss Is Not Equal: How Emulator Placement and Implementation Choice Flip HTTP/2-vs-HTTP/3 Verdicts"**
+(alt: "Why HTTP/3 Lost to HTTP/2 in Our Testbed: Two Emulation Pitfalls and a One-Line Congestion-Control Bug")
+
+## Status (2026-11-02)
+Done: A, B, F, G, D, P (about 2,700 serial transfers). Running: H (quiche as a 4th sender).
+The full narrative now exists: artifact -> confound -> implementation -> root cause -> intervention.
 
 ## Claims (each backed by a configuration in `data/rigor/`)
 1. **netem on an endpoint does not apply the configured loss rate equally to TCP and QUIC.** Because netem drops per skb, and
@@ -17,7 +22,13 @@ than HTTP/2 under >= 2 % loss") does not hold as a protocol result. What holds i
 3. **Under equal loss, the verdict depends on the QUIC implementation, not the protocol.** quic-go HTTP/3 is faster than kernel
    TCP HTTP/2 in every cell (0.5-0.9x); nginx HTTP/3 is slower (1.1-2.1x). (F, G; mechanism from qlog in D.)
 4. **Client receive-buffer overflow is a second, host-dependent confound** that only hits unpaced QUIC senders and flips the
-   0 %-loss verdict between hosts. (A at 0 %: ~180 RcvbufErrors per nginx-h3 transfer; G removes it.)
+   0 %-loss verdict between hosts. (A at 0 %: ~180 RcvbufErrors per nginx-h3 transfer; G removes it and nginx h3 becomes
+   13-15 % faster than h2, reproducing the course report's 0 % result.)
+5. **The residual nginx penalty has a one-line root cause, confirmed by intervention.** nginx's CUBIC reads bytes-in-flight
+   for the multiplicative decrease after the ACK's acked and lost packets have been subtracted, so each loss cuts more than
+   beta. qlog shows nginx holding ~4 packets/RTT vs quic-go's ~12 at 2 % loss. Rebuilding the same commit with the reduction
+   taken from the window makes nginx 1.5-4.5x faster under loss with no change at 0 %, and removes every significant
+   HTTP/3 deficit vs HTTP/2. (D, P.) -> report upstream to nginx with a proper fix (snapshot flight size before ACK processing).
 
 ## What is NOT claimed (and why)
 - Not "QUIC beats TCP": one mature stack (quic-go) vs one kernel TCP; need >= 1 more mature stack (quiche or msquic) before a
@@ -33,7 +44,9 @@ than HTTP/2 under >= 2 % loss") does not hold as a protocol result. What holds i
 3. Testbed - three namespaces, pinned toolchain, serial runs, per-transfer kernel counters, Docker artifact.
 4. Pitfall 1: netem placement (Fig: realised loss-event rate per sender, A/B/F; Fig: h3/h2 ratio A vs F).
 5. Pitfall 2: receiver buffer (Fig: RcvbufErrors vs sender; 0 % verdict F vs G).
-6. Implementation dependence under equal loss (Fig: completion-time CDFs, three senders; qlog stall analysis).
+6. Implementation dependence under equal loss (Fig: completion-time CDFs, three/four senders; qlog delivery rate per RTT).
+6b. Root cause and intervention (code excerpt of `ngx_quic_congestion_lost`; Table: stock vs patched nginx; Fig: ratio
+   shift G -> P).
 7. Related work (docs/related_work_verified.md) - closest: Jaeger et al. IFIP Networking'23 (offloads/buffers for throughput),
    Yu & Benson WWW'21, Marx et al. EPIQ'20, Zhang et al. WWW'24. Delta: we quantify how emulator placement biases *loss*
    comparisons, which none of them do (verify by reading B2/B4 in full before submitting).

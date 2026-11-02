@@ -18,6 +18,13 @@ df["topology"] = df.topology.fillna("direct")
 if "quicgo_gso" not in df:
     df["quicgo_gso"] = "on"
 df["quicgo_gso"] = df.quicgo_gso.fillna("on")
+# host sleep guard: if the wall-clock gap to the previous row exceeds the transfer time by > 60 s, the Docker VM was
+# suspended (macOS idle sleep) around this transfer; drop it (5 rows of ~2700 in the first runs)
+df["_gap"] = (pd.to_datetime(df.timestamp).groupby(df.run_id).diff().dt.total_seconds()
+             - df.total_s.fillna(a.max_time))
+_n = len(df)
+df = df[~(df._gap > 60)].copy()
+print(f"excluded {_n - len(df)} transfers adjacent to host sleep", file=sys.stderr)
 df["t"] = np.where(df.ok == 1, df.total_s, a.max_time)
 # data-direction loss events per transfer and what fraction of netem's dequeued packets they are
 df["drop_frac_pct"] = 100 * df.data_dropped / (df.data_sent_pkts + df.data_dropped).clip(lower=1)
