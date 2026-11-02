@@ -8,7 +8,7 @@ than HTTP/2 under >= 2 % loss") does not hold as a protocol result. What holds i
 (alt: "Why HTTP/3 Lost to HTTP/2 in Our Testbed: Two Emulation Pitfalls and a One-Line Congestion-Control Bug")
 
 ## Status (2026-11-02)
-Done: A, B, F, G, D, P (about 2,700 serial transfers). Running: H (quiche as a 4th sender).
+Done: A, B, F, G, D, P, H (about 3,300 serial transfers; quiche added as a 4th sender, behaves like quic-go).
 The full narrative now exists: artifact -> confound -> implementation -> root cause -> intervention.
 
 ## Claims (each backed by a configuration in `data/rigor/`)
@@ -31,8 +31,8 @@ The full narrative now exists: artifact -> confound -> implementation -> root ca
    HTTP/3 deficit vs HTTP/2. (D, P.) -> report upstream to nginx with a proper fix (snapshot flight size before ACK processing).
 
 ## What is NOT claimed (and why)
-- Not "QUIC beats TCP": one mature stack (quic-go) vs one kernel TCP; need >= 1 more mature stack (quiche or msquic) before a
-  general statement.
+- Not "QUIC beats TCP" in general: two mature stacks (quic-go, quiche) vs one kernel TCP (CUBIC), one object size, one host.
+  The defensible statement is "no HTTP/3 loss penalty for mature stacks under equal loss in this setup".
 - Not India-specific results: the original India profiles have modeled loss and are not significant; drop them from the paper or
   keep as a short "realistic-profile" sanity section with the caveat. (Real on-device runs would be a separate paper.)
 - Not the receiver-side throughput bottleneck: Zhang et al. WWW'24 (cite).
@@ -54,7 +54,9 @@ The full narrative now exists: artifact -> confound -> implementation -> root ca
 9. Limitations - single host (Docker VM on Apple M3), 1 MB objects, uniform loss, two RTTs, one TCP CC (CUBIC).
 
 ## Experiments still worth adding (in priority order)
-1. **One more mature QUIC sender** (quiche via `quiche-server`, or msquic) under F/G - makes claim 3 general. ~1 day.
+1. ~~One more mature QUIC sender~~ done (quiche, config H).
+1b. **Proper nginx fix** (snapshot flight size before ACK processing, keep RFC 9438 app-limited safeguard), re-run P with it,
+    and send it upstream with the data. Strongest single addition: turns a finding into a merged fix.
 2. **More RTT/loss cells under G** (20, 200 ms; 0.5, 3 %) for the figure, and 10 MB objects. ~half a day of machine time.
 3. **Bare-metal Linux replication** of A vs F (any spare Linux laptop): removes "it's a Docker VM" objection. ~half a day.
 4. **Original WSL2 host replication of A vs F** by Abhilash - closes the loop with the course data.

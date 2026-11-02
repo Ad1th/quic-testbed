@@ -43,7 +43,7 @@ summ = (df.groupby(key + ["protocol"])
 rows = []
 for k, g in df.groupby(key):
     p = g.pivot_table(index="iteration", columns="protocol", values="t")
-    for q in [c for c in ("h3", "h3qg") if c in p and "h2" in p]:
+    for q in [c for c in ("h3", "h3qg", "h3qc") if c in p and "h2" in p]:
         x = p[["h2", q]].dropna()
         r = x[q].values / x["h2"].values
         bs = [np.median(rng.choice(r, len(r))) for _ in range(2000)]

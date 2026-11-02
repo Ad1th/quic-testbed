@@ -178,6 +178,39 @@ excluded (see "Data hygiene").
   P: 3 transfers). Later runs used `caffeinate`. The exit-hang guard never fired, so the curl-hang note in Finding 4 is
   withdrawn: it was host sleep.
 
-## Pending
+## Finding 9: a second mature QUIC stack (Cloudflare quiche 0.29.3) also beats or matches TCP under equal loss
 
-- H (G conditions + Cloudflare quiche 0.29.3 as a fourth sender): running.
+Configuration H = G conditions with four senders in the same run (634 transfers after excluding 6 next to host sleep;
+0 failures, 0 RcvbufErrors). Paired ratio vs HTTP/2 (* = significant after Bonferroni over 24 tests):
+
+| RTT / loss | h2 (s) | nginx h3 | quic-go h3 | quiche h3 |
+|---|---|---|---|---|
+| 50 / 0 % | 0.60 | 0.79* | 0.60* | 0.84* |
+| 50 / 1 % | 2.28 | 1.86* | 0.61 | 0.97 |
+| 50 / 2 % | 4.32 | 1.49* | 0.62* | 0.84 |
+| 50 / 5 % | 10.16 | 1.22 | 0.58* | 0.78* |
+| 100 / 0 % | 0.96 | 0.89* | 0.70* | 0.89 |
+| 100 / 1 % | 2.42 | 2.62* | 0.94 | 1.01 |
+| 100 / 2 % | 7.02 | 1.51* | 0.79 | 0.85 |
+| 100 / 5 % | 19.21 | 1.09 | 0.54* | 0.70* |
+
+- quiche is never significantly slower than kernel TCP (0.70-1.01x) and significantly faster in 3 of 8 cells; quic-go
+  (0.54-0.94x) is significantly faster in 5 of 8 and never slower.
+- Stock nginx repeats its G pattern inside the same run (slower at 1-2 %, faster at 0 %), so the nginx result is not an
+  artefact of run-to-run drift.
+- Conclusion across F, G, H, P: **under equal per-packet loss, the HTTP/3 "loss penalty" is specific to stock nginx's QUIC
+  sender; two independent mature stacks and a one-line-patched nginx do not show it.**
+
+## Figures (`data/rigor/figs/`)
+
+- `loss/fig_realised_loss.png`: realised loss events per data packet vs nominal, per sender, A / B / F.
+- `main/fig_ratio.png`: paired h3/h2 ratios with 95 % CI per sender across A, F, G, P, H.
+- `main/fig_cdf_50ms_2pct.png`: completion-time CDFs at 50 ms / 2 % across A, F, G, P, H.
+
+## Limitations of this re-run
+
+- One host type (Docker Desktop VM, Linux 6.10, Apple M3); not bare metal. The original WSL2 host was not re-run.
+- 1 MB objects only, uniform random loss only, two RTTs, 1 Gbit netem rate (no bottleneck queue), TCP CUBIC only.
+- Client is always curl/ngtcp2; client-side effects (ACK frequency, flow control) were not varied.
+- Configurations ran sequentially over ~20 hours, so cross-configuration comparisons of absolute times include drift;
+  within-run paired ratios are the primary metric.

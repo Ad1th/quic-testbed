@@ -35,6 +35,17 @@ execute any command with the namespaces and nginx up (no sudo needed).
 - 10 MB: HTTP/2 faster in all 9 cells tested. Mobile profiles (Airtel-calibrated RTT/jitter/rate, modeled loss): HTTP/3 faster, not significant after correction.
 - Blackout: HTTP/3 not faster to recover. Client IP change: HTTP/2 0/8, aioquic HTTP/3 6/8, curl HTTP/3 0/8.
 
+## Controlled re-run (branch `rigor/clean-rerun`, details: `docs/RIGOR_FINDINGS.md`, paper plan: `docs/PAPER_PLAN.md`)
+The results above come from netem on the endpoints' own veths with parallel shards. A serial, pinned re-run with per-transfer
+kernel counters (`repro/`, runs on any Docker host: `docker build -t quic-testbed:pinned repro && repro/run_matrix2.sh`) shows:
+- **netem on an endpoint under-applies loss to TCP (always-GSO) and quic-go (UDP GSO)**: at "2 %" they saw ~1 % / ~0.6 % loss
+  events per packet while nginx's QUIC saw 2 %. `ethtool` does not fix it; a router namespace (`--topology bridge`) does.
+- With equal per-packet loss and a 4 MB client UDP buffer, nginx HTTP/3 is 13-15 % faster than HTTP/2 at 0 % loss (as in the
+  course report) but 1.15-2.7x slower under loss; **quic-go and quiche HTTP/3 are faster than HTTP/2 under loss**.
+- nginx's remaining penalty comes from its CUBIC reduction using post-ACK bytes in flight; the same nginx commit with the
+  reduction taken from the window (`repro/Dockerfile.nginxpatch`) is 1.5-4.5x faster under loss and never significantly slower
+  than HTTP/2.
+
 ## Notes
 - `data/raw/results.csv` is sweep 1 (minus the old India rows) plus later shards; do not regenerate over it.
 - Never run two experiments at once if you want clean timings (several sweeps here ran as parallel shards on 12 threads).

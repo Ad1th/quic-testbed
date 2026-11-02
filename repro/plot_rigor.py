@@ -59,7 +59,7 @@ R = pd.DataFrame(rows)
 cells = R[["rtt", "loss"]].drop_duplicates().sort_values(["rtt", "loss"]).values.tolist()
 qs = [q for q in NAME if q in R.proto.unique()]
 MK = dict(zip(D, "s^oDvP"))
-fig, axes = plt.subplots(len(qs), 1, figsize=(6.5, 1.9 * len(qs) + 0.4), sharex=True, sharey=True)
+fig, axes = plt.subplots(len(qs), 1, figsize=(7.2, 1.7 * len(qs) + 0.5), sharex=True, sharey=True)
 axes = np.atleast_1d(axes)
 for ax, q in zip(axes, qs):
     w = 0.8 / len(D)
@@ -73,7 +73,7 @@ for ax, q in zip(axes, qs):
     ax.set_yticks([0.25, 0.5, 1, 2, 4, 8], ["0.25", "0.5", "1", "2", "4", "8"])
     ax.minorticks_off()
     ax.set_ylabel(f"{NAME[q]}\n/ HTTP/2")
-    ax.legend(fontsize=7, ncol=len(D), frameon=False, loc="upper right", title="config", title_fontsize=7)
+    ax.legend(fontsize=7, frameon=False, loc="upper left", bbox_to_anchor=(1.0, 1.0), title="config", title_fontsize=7)
 axes[-1].set_xticks(range(len(cells)), [f"{r:g} ms\n{l:g} %" for r, l in cells])
 fig.text(0.01, 0.98, "completion-time ratio vs HTTP/2 (median of paired ratios, 95 % CI; < 1 = HTTP/3 faster)",
          fontsize=8, va="top")
