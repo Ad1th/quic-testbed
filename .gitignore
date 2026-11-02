@@ -28,3 +28,7 @@ data/captures/keys.log
 docs/Computer Networks Lab Submission 9.pdf
 docs/Network_Measurement_Evidence.docx
 docs/Project_Report_Real_Results.docx
+
+# rigor re-run: rebuilt from repro/quicgo-server (go build)
+repro/quicgo-server/quicgo-server
+logs/

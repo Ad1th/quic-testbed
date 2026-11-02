@@ -1,0 +1,9 @@
+# Adds Cloudflare quiche's HTTP/3 server (quiche-server, tag 0.29.3) to the pinned testbed image as a fourth sender.
+FROM quic-testbed:pinned AS qb
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
+ && curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.88.0
+ENV PATH=/root/.cargo/bin:$PATH
+RUN git clone -q --depth 1 --branch 0.29.3 --recursive https://github.com/cloudflare/quiche /build/quiche \
+ && cd /build/quiche && cargo build -q --release --bin quiche-server
+FROM quic-testbed:pinned
+COPY --from=qb /build/quiche/target/release/quiche-server /opt/h3/bin/quiche-server

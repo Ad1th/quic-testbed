@@ -1,0 +1,38 @@
+offloads on 29 features on (server veth) | tcp cc: cubic
+[1/8] offloads=on rtt=50 loss=0 35s fails=0
+[2/8] offloads=on rtt=50 loss=1 1188s fails=0
+--- relaunch Mon Nov  2 03:20:05 IST 2026
+offloads on 29 features on (server veth) | tcp cc: cubic
+[1/2] offloads=on rtt=50 loss=2 212s fails=0
+[2/2] offloads=on rtt=50 loss=5 401s fails=0
+done 20261101T215007-3800d8 /work/data/rigor/A_offon.csv
+offloads on 29 features on (server veth) | tcp cc: cubic
+[1/4] offloads=on rtt=100 loss=0 66s fails=0
+[2/4] offloads=on rtt=100 loss=1 250s fails=0
+[3/4] offloads=on rtt=100 loss=2 368s fails=0
+[4/4] offloads=on rtt=100 loss=5 735s fails=0
+done 20261101T220023-6bd88a /work/data/rigor/A_offon.csv
+offloads off 22 features on (server veth) | tcp cc: cubic
+[1/8] offloads=off rtt=50 loss=0 36s fails=0
+[2/8] offloads=off rtt=50 loss=1 121s fails=0
+[3/8] offloads=off rtt=50 loss=2 203s fails=0
+[4/8] offloads=off rtt=50 loss=5 414s fails=0
+[5/8] offloads=off rtt=100 loss=0 63s fails=0
+[6/8] offloads=off rtt=100 loss=1 254s fails=0
+[7/8] offloads=off rtt=100 loss=2 429s fails=0
+[8/8] offloads=off rtt=100 loss=5 743s fails=0
+done 20261101T222404-d0370d /work/data/rigor/B_offoff.csv
+topology direct | offloads off 21 features on (server veth) | tcp cc: cubic
+--- matrix2 Mon Nov  2 04:33:15 IST 2026
+topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
+[1/8] offloads=off rtt=50 loss=0 36s fails=0
+[2/8] offloads=off rtt=50 loss=1 157s fails=0
+[3/8] offloads=off rtt=50 loss=2 290s fails=0
+[4/8] offloads=off rtt=50 loss=5 531s fails=0
+[5/8] offloads=off rtt=100 loss=0 63s fails=0
+[6/8] offloads=off rtt=100 loss=1 297s fails=0
+[7/8] offloads=off rtt=100 loss=2 477s fails=0
+[8/8] offloads=off rtt=100 loss=5 985s fails=0
+done 20261101T230318-bd7a80 /work/data/rigor/F_bridge.csv
+topology bridge | offloads off 21 features on (server veth) | tcp cc: cubic
+[1/8] offloads=off rtt=50 loss=0 30s fails=0
