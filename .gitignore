@@ -32,3 +32,8 @@ docs/Project_Report_Real_Results.docx
 # rigor re-run: rebuilt from repro/quicgo-server (go build)
 repro/quicgo-server/quicgo-server
 logs/
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out

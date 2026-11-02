@@ -1,6 +1,6 @@
 # Controlled re-run: what survives when the testbed confounds are removed
 
-_Branch `rigor/clean-rerun`, run 2026-11-02. Everything here is reproducible with `repro/` (Docker image with the exact
+_Branch `rigor/clean-rerun`, run 2026-11-02. Canonical numbers: `paper/make_assets.py` (A excludes one sleep-adjacent transfer, which moved A 50 ms / 1 % from 3.99 to 3.54). Everything here is reproducible with `repro/` (Docker image with the exact
 toolchain commits of `scripts/build_toolchain.sh`: curl 8.23.1-DEV / ngtcp2 1.26.0-DEV / nghttp3 / OpenSSL 3.6.5, nginx 1.31.9),
 plus quic-go v0.64.1 as an additional, independent HTTP/3 sender._
 
@@ -62,7 +62,7 @@ Configurations A and B (netem on endpoints), paired median ratio vs HTTP/2 (< 1 
 | RTT / loss | A: nginx h3 | A: quic-go h3 | B: nginx h3 | B: quic-go h3 |
 |---|---|---|---|---|
 | 50 / 0 % | 1.23* | 0.62* | see report_B.md | see report_B.md |
-| 50 / 1 % | 3.99* | 0.65 | | |
+| 50 / 1 % | 3.54* | 0.65 | | |
 | 50 / 2 % | 4.69* | 0.76 | | |
 | 50 / 5 % | 2.50* | 0.52* | | |
 | 100 / 0 % | 1.34* | 0.68* | | |
@@ -90,7 +90,7 @@ quic-go 1.06/2.16/4.89 %; 50 ms). Median completion time (s) and paired ratio vs
 | RTT / loss | h2 A -> F | nginx h3 A -> F | nginx h3/h2 A -> F | quic-go h3/h2 F |
 |---|---|---|---|---|
 | 50 / 0 % | 0.57 -> 0.59 | 0.72 -> 0.73 | 1.23* -> 1.17* | 0.61* |
-| 50 / 1 % | 0.94 -> 2.31 | 4.71 -> 4.82 | 3.99* -> 2.10 | 0.88 |
+| 50 / 1 % | 0.94 -> 2.31 | 4.71 -> 4.82 | 3.54* -> 2.10 | 0.88 |
 | 50 / 2 % | 1.50 -> 4.65 | 7.28 -> 7.38 | 4.69* -> **1.55*** | 0.61* |
 | 50 / 5 % | 4.47 -> 10.50 | 11.70 -> 11.06 | 2.50* -> **1.08** | 0.50* |
 | 100 / 0 % | 0.96 -> 0.97 | 1.42 -> 1.31 | 1.34* -> 1.36* | 0.70* |
@@ -158,7 +158,7 @@ excluded (see "Data hygiene").
 | 100 / 5 % | 20.40 | 13.73 | 1.5x | 1.23 | 0.87 (p_bonf 0.08) |
 
 - Loss-free performance is unchanged (the patch only touches the congestion-event path), lossy performance improves
-  1.5-4.5x. Stock nginx is significantly slower than HTTP/2 in 6 of 6 lossy cells; patched nginx in **none**, and
+  1.5-4.5x. Stock nginx is significantly slower than HTTP/2 in 5 of 6 lossy cells; patched nginx in **none**, and
   significantly faster in 2.
 - Cross-run absolute times drift (HTTP/2 medians in P are 0-60 % above G at 1 %, where TCP's completion time is bimodal),
   which is why the within-run paired ratios are the primary metric; both metrics agree.

@@ -1,0 +1,16 @@
+\begin{tabular}{@{}lr|rrrr|r|rrrr|r@{}}
+\toprule
+ & HTTP/2 & \multicolumn{5}{c|}{nginx HTTP/3 / HTTP/2} & \multicolumn{4}{c|}{quic-go / HTTP/2} & quiche \\
+RTT, loss & G (s) & A & F & G & H & P$^\dagger$ & A & F & G & H & H \\
+\midrule
+50\,ms, 0\,\% & 0.55 & \textbf{1.23}$^{\uparrow}$ & \textbf{1.17}$^{\uparrow}$ & \textbf{0.85}$^{\downarrow}$ & \textbf{0.79}$^{\downarrow}$ & \textbf{0.81}$^{\downarrow}$ & \textbf{0.62}$^{\downarrow}$ & \textbf{0.61}$^{\downarrow}$ & \textbf{0.63}$^{\downarrow}$ & \textbf{0.60}$^{\downarrow}$ & \textbf{0.84}$^{\downarrow}$ \\
+50\,ms, 1\,\% & 1.62 & \textbf{3.54}$^{\uparrow}$ & 2.10 & \textbf{2.72}$^{\uparrow}$ & \textbf{1.86}$^{\uparrow}$ & 1.31 & 0.65 & 0.88 & 0.70 & 0.61 & 0.97 \\
+50\,ms, 2\,\% & 4.29 & \textbf{4.69}$^{\uparrow}$ & \textbf{1.55}$^{\uparrow}$ & \textbf{1.63}$^{\uparrow}$ & \textbf{1.49}$^{\uparrow}$ & 0.84 & 0.76 & \textbf{0.61}$^{\downarrow}$ & 0.62 & \textbf{0.62}$^{\downarrow}$ & 0.84 \\
+50\,ms, 5\,\% & 9.58 & \textbf{2.50}$^{\uparrow}$ & 1.08 & \textbf{1.15}$^{\uparrow}$ & 1.22 & \textbf{0.64}$^{\downarrow}$ & \textbf{0.52}$^{\downarrow}$ & \textbf{0.50}$^{\downarrow}$ & \textbf{0.57}$^{\downarrow}$ & \textbf{0.58}$^{\downarrow}$ & \textbf{0.78}$^{\downarrow}$ \\
+\midrule
+100\,ms, 0\,\% & 0.99 & \textbf{1.34}$^{\uparrow}$ & \textbf{1.36}$^{\uparrow}$ & \textbf{0.87}$^{\downarrow}$ & \textbf{0.89}$^{\downarrow}$ & \textbf{0.87}$^{\downarrow}$ & \textbf{0.68}$^{\downarrow}$ & \textbf{0.70}$^{\downarrow}$ & \textbf{0.69}$^{\downarrow}$ & \textbf{0.70}$^{\downarrow}$ & 0.89 \\
+100\,ms, 1\,\% & 4.44 & \textbf{4.23}$^{\uparrow}$ & \textbf{1.99}$^{\uparrow}$ & \textbf{2.07}$^{\uparrow}$ & \textbf{2.62}$^{\uparrow}$ & 0.66 & 0.85 & 0.76 & 0.77 & 0.94 & 1.01 \\
+100\,ms, 2\,\% & 7.72 & \textbf{6.11}$^{\uparrow}$ & \textbf{2.02}$^{\uparrow}$ & \textbf{1.60}$^{\uparrow}$ & \textbf{1.51}$^{\uparrow}$ & \textbf{0.65}$^{\downarrow}$ & 0.78 & \textbf{0.50}$^{\downarrow}$ & 0.64 & 0.79 & 0.85 \\
+100\,ms, 5\,\% & 17.04 & \textbf{1.88}$^{\uparrow}$ & 1.10 & 1.23 & 1.09 & 0.87 & \textbf{0.56}$^{\downarrow}$ & \textbf{0.59}$^{\downarrow}$ & \textbf{0.59}$^{\downarrow}$ & \textbf{0.54}$^{\downarrow}$ & \textbf{0.70}$^{\downarrow}$ \\
+\bottomrule
+\end{tabular}

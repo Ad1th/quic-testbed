@@ -1,0 +1,13 @@
+\begin{tabular}{@{}clcclr@{}}
+\toprule
+Cfg & netem on & Offl. & rcvbuf & HTTP senders & $n$ \\
+\midrule
+A & endpoint veth & on & 208\,KB & h2, nginx, quic-go & 479 \\
+B & endpoint veth & off & 208\,KB & h2, nginx, quic-go & 480 \\
+F & router netns & off & 208\,KB & h2, nginx, quic-go & 480 \\
+G & router netns & off & 4\,MB & h2, nginx, quic-go & 480 \\
+D & router netns & off & 4\,MB & nginx, quic-go + qlog & 30 \\
+P & router netns & off & 4\,MB & h2, \emph{patched} nginx, quic-go & 477 \\
+H & router netns & off & 4\,MB & h2, nginx, quic-go, quiche & 634 \\
+\bottomrule
+\end{tabular}

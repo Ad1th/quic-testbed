@@ -139,8 +139,7 @@ def netem(rtt, loss, rate):
 
 
 def fetch(proto, fname, max_time, qlog):
-    """Returns (fields or None, exit_hang). curl/ngtcp2 can print its -w line and then hang on connection close
-    (seen: 17 min); such a process is killed after max_time+5 s and its already-printed measurement is kept."""
+    """Returns (fields or None, exit_hang). guard against a fetch that never exits: such a process is killed after max_time+5 s and its already-printed measurement is kept."""
     env = dict(os.environ)
     if qlog and proto != "h2":
         env["QLOGDIR"] = f"{qlog}/client_{proto}"
